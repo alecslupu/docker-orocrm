@@ -3,48 +3,25 @@ version: "3.2"
 services:
   nginx-proxy:
     image: jwilder/nginx-proxy
-    container_name: ${PROJECT_CONTAINER_PREFIX}_nginx-proxy
+    container_name: ${PROJECT_PREFIX}nginx-proxy
     ports:
       - 80:80
       - 443:443
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
-  data:
-    image: djocker/orodata
-#    volumes:
-#      - "${DEV_OROCRM_CACHE_DIR}:/var/www/app/cache"
-#      - "${DEV_OROCRM_UPLOADS_DIR}:/var/www/web/uploads"
-#      - "${DEV_OROCRM_MEDIA_DIR}:/var/www/web/media"
-#      - "${DEV_OROCRM_ATTACHMENT_DIR}:/var/www/app/attachment"
-#      - "${DEV_MYSQL_DIR}:/var/lib/mysql"
-#      - "${DEV_POSTGRESQL_DIR}:/var/lib/postgresql/data"
-#      - "${DEV_OROCRM_IMPORT_EXPORT_DIR}:/var/www/app/import_export"
-
-  source_code:
-    image: djocker/orocrm
-    volumes:
-      - dev_orocrm_root_dir:/var/www
-#      - /etc/group:/etc/group:ro
-#      - /etc/passwd:/etc/passwd:ro
-#    user: "${HOST_USER_ID}:${HOST_USER_ID}"
-    environment:
-      - "GIT_URI=${GIT_URI}"
-      - "GIT_REF=${GIT_REF}"
-      - HOST_USER_ID
-
   db:
     image: mysql:5.5
-    container_name: ${PROJECT_CONTAINER_PREFIX}_db
+    container_name: ${PROJECT_PREFIX}db
     expose:
-      - "3306"
+      - 3306
     environment:
-      - "MYSQL_ROOT_PASSWORD=${DEV_MYSQL_ROOT_PASSWORD}"
-      - "MYSQL_DATABASE=${DEV_MYSQL_DATABASE}"
-      - "MYSQL_USER=${DEV_MYSQL_USER}"
-      - "MYSQL_PASSWORD=${DEV_MYSQL_PASSWORD}"
-    volumes_from:
-      - data
+      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+      - "MYSQL_USER=${MYSQL_USER}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+#    volumes_from:
+#      - data
 
   mail:
     image: catatnight/postfix
@@ -52,92 +29,96 @@ services:
     expose:
       - "25"
     environment:
-      - "maildomain=${DEV_APP_MAILER_HOST}"
-      - "smtp_user=${DEV_APP_MAILER_USER}@${DEV_APP_MAILER_HOST}:${DEV_APP_MAILER_PASSWORD}"
+      - "maildomain=${APP_MAILER_HOST}"
+      - "smtp_user=${APP_MAILER_USER}@${APP_MAILER_HOST}:${APP_MAILER_PASSWORD}"
 
   orocrm:
-    image: hellosworldos/oromono
+    image: hellosworldos/orocrm
     build:
-      context: ./dockerfiles/oromono
+      context: ./
       dockerfile: Dockerfile
-    container_name: ${PROJECT_CONTAINER_PREFIX}_orocrm
+    container_name: ${PROJECT_PREFIX}orocrm
     links:
       - "db"
       - "mail"
       - "nginx-proxy"
     expose:
       - 80
+      - 443
     ports:
-      - "${DEV_APP_WEBSOCKET_FRONTEND_PORT}:8080"
-    volumes_from:
-      - data
-      - source_code
+      - "${APP_WEBSOCKET_FRONTEND_PORT}:8080"
+    volumes:
+      - "${HOST_APP_ROOT}:${APP_ROOT}"
+      - "./phing:/opt/phing"
+      - "~/.ssh/id_rsa:/home/www-data/.ssh/id_rsa:ro"
+      - "~/.ssh/id_rsa.pub:/home/www-data/.ssh/id_rsa.pub:ro"
     environment:
-#      - CMD_INIT_BEFORE=
-#      - CMD_INIT_CLEAN=
-#      - CMD_INIT_INSTALLED=
-#      - CMD_INIT_AFTER=
-      - "APP_DB_DRIVER=${DEV_APP_DB_DRIVER}"
-      - "APP_DB_HOST=${DEV_APP_DB_HOST}"
-      - "APP_DB_PORT=${DEV_APP_DB_PORT}"
-      - "APP_DB_USER=${DEV_MYSQL_DATABASE}"
-      - "APP_DB_PASSWORD=${DEV_MYSQL_USER}"
-      - "APP_DB_NAME=${DEV_MYSQL_PASSWORD}"
+      - APP_DB_DRIVER
+      - APP_DB_HOST
+      - APP_DB_PORT
+      - "APP_DB_USER=${MYSQL_USER}"
+      - "APP_DB_PASSWORD=${MYSQL_PASSWORD}"
+      - "APP_DB_NAME=${MYSQL_DATABASE}"
       - "APP_HOSTNAME=mail"
-      - "APP_MAILER_TRANSPORT=${DEV_APP_MAILER_TRANSPORT}"
-      - "APP_MAILER_HOST=${DEV_APP_MAILER_HOST}"
-      - "APP_MAILER_PORT=${DEV_APP_MAILER_PORT}"
-      - "APP_MAILER_ENCRYPTION=${DEV_APP_MAILER_ENCRYPTION}"
-      - "APP_MAILER_USER=${DEV_APP_MAILER_USER}"
-      - "APP_MAILER_PASSWORD=${DEV_APP_MAILER_PASSWORD}"
+      - APP_MAILER_TRANSPORT
+      - APP_MAILER_HOST
+      - APP_MAILER_PORT
+      - APP_MAILER_ENCRYPTION
+      - APP_MAILER_USER
+      - APP_MAILER_PASSWORD
       - APP_WEBSOCKET_BACKEND_PORT=80
-      - "APP_WEBSOCKET_FRONTEND_PORT=${DEV_APP_WEBSOCKET_FRONTEND_PORT}"
-      - "APP_SECRET=${DEV_APP_SECRET}"
-      - APP_IS_INSTALLED=0
-      - "VIRTUAL_HOST=${DEV_VIRTUAL_HOST}"
-      - "SYMFONY_ENV=${DEV_SYMFONY_ENV}"
-      - "APP_ROOT=${DEV_CONTAINER_OROCRM_ROOT}"
+      - APP_WEBSOCKET_FRONTEND_PORT
+      - APP_SECRET
+      - VIRTUAL_HOST
+      - SYMFONY_ENV
+      - SYMFONY_INDEX_FILE
+      - APP_ROOT
+      - GIT_URI
+      - GIT_REF
+      - DEV_USER_ID
+      - DEV_GROUP_ID
+      - OROCRM_ADMIN_EMAIL
 
-volumes:
-  - dev_orocrm_cache_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_OROCRM_CACHE_DIR}"
-        o: bind
-  - dev_orocrm_uploads_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_OROCRM_UPLOADS_DIR}"
-        o: bind
-  - dev_orocrm_media_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_OROCRM_MEDIA_DIR}"
-        o: bind
-  - dev_orocrm_attachment_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_OROCRM_ATTACHMENT_DIR}"
-        o: bind
-  - dev_mysql_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_MYSQL_DIR}"
-        o: bind
-  - dev_postgresql_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_POSTGRESQL_DIR}"
-        o: bind
-  - dev_orocrm_import_export_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_OROCRM_IMPORT_EXPORT_DIR}"
-        o: bind
-  - dev_orocrm_root_dir:
-      driver_opts:
-        type: none
-        device: "${DEV_OROCRM_ROOT_DIR}"
-        o: bind
-  - dev_orocrm_bundle_dir:
-      external: true
+#volumes:
+#  dev_orocrm_cache_dir:
+#      driver_opts:
+#        type: none
+#        device: "${OROCRM_CACHE_DIR}"
+#        o: bind
+#  dev_orocrm_uploads_dir:
+#      driver_opts:
+#        type: none
+#        device: "${OROCRM_UPLOADS_DIR}"
+#        o: bind
+#  dev_orocrm_media_dir:
+#      driver_opts:
+#        type: none
+#        device: "${OROCRM_MEDIA_DIR}"
+#        o: bind
+#  dev_orocrm_attachment_dir:
+#      driver_opts:
+#        type: none
+#        device: "${OROCRM_ATTACHMENT_DIR}"
+#        o: bind
+#  dev_mysql_dir:
+#      driver_opts:
+#        type: none
+#        device: "${MYSQL_DIR}"
+#        o: bind
+#  dev_postgresql_dir:
+#      driver_opts:
+#        type: none
+#        device: "${POSTGRESQL_DIR}"
+#        o: bind
+#  dev_orocrm_import_export_dir:
+#      driver_opts:
+#        type: none
+#        device: "${OROCRM_IMPORT_EXPORT_DIR}"
+#        o: bind
+#  dev_orocrm_root_dir:
+#      driver_opts:
+#        type: none
+#        device: "${OROCRM_ROOT_DIR}"
+#        o: bind
+#  dev_orocrm_bundle_dir:
+#      external: true

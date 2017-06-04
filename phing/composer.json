@@ -1,0 +1,24 @@
+{
+  "name": "hellosworldos/phing-orocrm-install",
+  "type": "library",
+  "license": "MIT",
+  "description": "OroCRM installaction script",
+  "authors": [
+    {
+      "name": "Yury Ksenevich",
+      "email": "yury@spadar.com"
+    }
+  ],
+  "require-dev": {
+    "phing/phing": "2.*",
+    "phpunit/phpunit": "^5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Widgento\\PhingLicense\\": "src/"
+    }
+  },
+  "require": {
+    "fxp/composer-asset-plugin": "^1.3"
+  }
+}
