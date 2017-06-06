@@ -4,3 +4,4 @@
 .env
 /orocrm/
 /phing/vendor/
+/phing/composer.lock

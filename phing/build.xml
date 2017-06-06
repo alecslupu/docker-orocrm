@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="hellosworldos_orocrm" default="install_application">
+<project name="hellosworldos_orocrm" default="install-app">
     <autoloader autoloaderpath="vendor/autoload.php" />
 
     <property environment="env" />
     <property name="app.dir" value="${env.APP_ROOT}" />
     <property name="app.user" value="www-data" />
+    <property name="app.installed" value="true" override="true" />
 
-    <target name="install_application">
+    <taskdef name="composermapenvparams" classname="Widgento\Phing\Yaml\MapEnvParamsTask" />
+    <taskdef name="composermapenvparam" classname="Widgento\Phing\Yaml\MapEnvParams\Param" />
+
+    <target name="install-app">
         <exec command="git init" dir="${app.dir}" passthru="true" checkreturn="false" />
         <exec command="git remote add origin ${env.GIT_URI}" dir="${app.dir}" passthru="true" checkreturn="false" />
         <exec command="git fetch origin --tags" dir="${app.dir}" passthru="true" checkreturn="true" />
@@ -14,22 +18,53 @@
         <exec command="git submodule update --init" dir="${app.dir}" passthru="true" checkreturn="true" />
         <replaceregexp file="${app.dir}/app/OroRequirements.php" pattern="return \$fileLength == 255;" replace="return \$fileLength >= 242;" />
         <exec command="composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader" dir="${app.dir}" passthru="true" checkreturn="true" />
-        <exec command='php app/console oro:install
-        --timeout 3600
-        --force
-        --drop-database
-        --env=${env.SYMFONY_ENV}
-        --user-name=admin
-        --user-firstname=John
-        --user-lastname=Doe
-        --user-password="admin1111"
-        --user-email="${env.OROCRM_ADMIN_EMAIL}"
-        --organization-name="Acme"
-        --application-url="${env.BASE_URL}"' dir="${app.dir}" passthru="true" checkreturn="true" />
+        <property name="app.installed" value="false" />
+        <phingcall target="update-symfony-parameters" />
+        <if>
+            <equals arg1="${env.APP_SAMPLE_DATA}" arg2="yes"/>
+            <then>
+                <property name="app.sample_data" value="--sample-data=SAMPLE_DATA"/>
+            </then>
+        </if>
+        <exec command='php app/console oro:install -n
+            ${app.sample_data}
+            --timeout 3600
+            --drop-database
+            --env=${env.SYMFONY_ENV}
+            --user-name=admin
+            --user-firstname=John
+            --user-lastname=Doe
+            --user-password="admin1111"
+            --user-email="${env.OROCRM_ADMIN_EMAIL}"
+            --organization-name="Acme"
+            --application-url="${env.BASE_URL}"' dir="${app.dir}" passthru="true" checkreturn="true" />
+    </target>
+
+    <target name="update-symfony-parameters">
+        <composermapenvparams file="${app.dir}/app/config/parameters.yml">
+            <composermapenvparam name="database_driver" value="${env.APP_DB_DRIVER}" />
+            <composermapenvparam name="database_host" value="${env.APP_DB_HOST}" />
+            <composermapenvparam name="database_port" value="${env.APP_DB_PORT}" />
+            <composermapenvparam name="database_name" value="${env.MYSQL_DATABASE}" />
+            <composermapenvparam name="database_user" value="${env.MYSQL_USER}" />
+            <composermapenvparam name="database_password" value="${env.MYSQL_PASSWORD}" />
+            <composermapenvparam name="mailer_transport" value="${env.APP_MAILER_TRANSPORT}" />
+            <composermapenvparam name="mailer_host" value="${env.APP_MAILER_HOST}" />
+            <composermapenvparam name="mailer_port" value="${env.APP_MAILER_PORT}" />
+            <composermapenvparam name="mailer_encryption" value="${env.APP_MAILER_ENCRYPTION}" />
+            <composermapenvparam name="mailer_user" value="${env.APP_MAILER_USER}" />
+            <composermapenvparam name="mailer_password" value="${env.APP_MAILER_PASSWORD}" />
+            <composermapenvparam name="websocket_bind_port" value="${env.APP_WEBSOCKET_BACKEND_PORT}" />
+            <composermapenvparam name="websocket_backend_port" value="${env.APP_WEBSOCKET_BACKEND_PORT}" />
+            <composermapenvparam name="websocket_frontend_port" value="${env.APP_WEBSOCKET_FRONTEND_PORT}" />
+            <composermapenvparam name="installed" value="${app.installed}" />
+            <composermapenvparam name="secret" value="${env.APP_SECRET}" />
+        </composermapenvparams>
     </target>
 
     <target name="init-webserver">
         <phingcall target="map-dev-user" />
+        <exec command="chown ${app.user}:${app.user} ." dir="${app.dir}" passthru="true" checkreturn="true" />
         <copy file="/etc/nginx/conf.d/orocrm.conf.dist" tofile="/etc/nginx/conf.d/orocrm.conf">
             <filterchain>
                 <replacetokens begintoken="${" endtoken="}">

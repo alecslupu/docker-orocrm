@@ -11,14 +11,16 @@
   ],
   "require-dev": {
     "phing/phing": "2.*",
-    "phpunit/phpunit": "^5.7"
+    "phpunit/phpunit": "^5.7",
+    "fxp/composer-asset-plugin": "^1.3",
+    "symfony/yaml": "^3.3"
+  },
+  "config": {
+    "bin-dir": "bin"
   },
   "autoload": {
     "psr-4": {
-      "Widgento\\PhingLicense\\": "src/"
+      "": "src/"
     }
-  },
-  "require": {
-    "fxp/composer-asset-plugin": "^1.3"
   }
 }

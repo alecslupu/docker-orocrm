@@ -56,10 +56,6 @@ services:
       - APP_DB_DRIVER
       - APP_DB_HOST
       - APP_DB_PORT
-      - "APP_DB_USER=${MYSQL_USER}"
-      - "APP_DB_PASSWORD=${MYSQL_PASSWORD}"
-      - "APP_DB_NAME=${MYSQL_DATABASE}"
-      - "APP_HOSTNAME=mail"
       - APP_MAILER_TRANSPORT
       - APP_MAILER_HOST
       - APP_MAILER_PORT
@@ -78,6 +74,11 @@ services:
       - DEV_USER_ID
       - DEV_GROUP_ID
       - OROCRM_ADMIN_EMAIL
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - BASE_URL
+      - APP_SAMPLE_DATA
 
 #volumes:
 #  dev_orocrm_cache_dir:
