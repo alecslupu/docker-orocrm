@@ -18,8 +18,9 @@
         <exec command="git submodule update --init" dir="${app.dir}" passthru="true" checkreturn="true" />
         <replaceregexp file="${app.dir}/app/OroRequirements.php" pattern="return \$fileLength == 255;" replace="return \$fileLength >= 242;" />
         <exec command="composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader" dir="${app.dir}" passthru="true" checkreturn="true" />
-        <property name="app.installed" value="false" />
-        <phingcall target="update-symfony-parameters" />
+        <phingcall target="update-symfony-parameters" >
+            <property name="app.installed" value="false" />
+        </phingcall>
         <if>
             <equals arg1="${env.APP_SAMPLE_DATA}" arg2="yes"/>
             <then>
