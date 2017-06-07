@@ -1,3 +1,0 @@
-[submodule "dockerfiles/oromono"]
-	path = dockerfiles/oromono
-	url = git@github.com:hellosworldos/oromono.git
