@@ -9,4 +9,4 @@ before_script:
   - travis_retry composer install -d ./phing/ --no-interaction
 
 script:
-  - ./phing/bin/phpunit -c tests/unit/phpunit.xml --coverage-text --process-isolation
+  - ./phing/bin/phpunit -c ./phing/tests/unit/phpunit.xml --coverage-text --process-isolation
