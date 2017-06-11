@@ -7,6 +7,10 @@ class Param
     private $name;
     private $value;
 
+    /**
+     * @param string $value
+     * @return $this
+     */
     public function setName($value)
     {
         $this->name = $value;
@@ -14,6 +18,9 @@ class Param
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getName()
     {
         return $this->name;

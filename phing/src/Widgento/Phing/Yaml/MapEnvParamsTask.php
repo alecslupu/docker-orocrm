@@ -2,12 +2,15 @@
 
 namespace Widgento\Phing\Yaml;
 
+use Widgento\Phing\FileFactory;
 use Widgento\Phing\Yaml\MapEnvParams\Param;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 class MapEnvParamsTask extends \Task
 {
+    const YAML_PARAMETERS = 'parameters';
+
     /**
      * @var string
      */
@@ -23,11 +26,15 @@ class MapEnvParamsTask extends \Task
      */
     public function main()
     {
-        $inputParameters = Yaml::parse(file_get_contents($this->getFile()), true);
+        $yamlFile         = FileFactory::create($this->getFile())->openFile('r');
+        $fileContents     = $yamlFile->fread($yamlFile->getSize());
+        $inputParameters  = Yaml::parse($fileContents, true);
 
         $outputParameters = $this->updateEnvParams($inputParameters);
 
-        file_put_contents($this->getFile(), Yaml::dump($outputParameters));
+        FileFactory::create($this->getFile())
+            ->openFile('w')
+            ->fwrite(Yaml::dump($outputParameters));
     }
 
     /**
@@ -73,7 +80,7 @@ class MapEnvParamsTask extends \Task
                 $yamlValue = $param->getValue();
             }
 
-            $yamlParams['parameters'][$param->getName()] = $yamlValue;
+            $yamlParams[self::YAML_PARAMETERS][$param->getName()] = $yamlValue;
         }
 
         return $yamlParams;

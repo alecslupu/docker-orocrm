@@ -1,6 +1,8 @@
 # docker-orocrm
 Containers for OroCRM bundle development
 
+[![Build Status](https://travis-ci.org/hellosworldos/docker-orocrm.svg?branch=master)](https://travis-ci.org/hellosworldos/docker-orocrm)
+
 ## Dev environment Installation
 
 * Pull the repository
