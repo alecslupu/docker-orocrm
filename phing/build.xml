@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="hellosworldos_orocrm" default="install-app">
     <autoloader autoloaderpath="vendor/autoload.php" />
+    <import file="vendor/hellosworldos/phing-webserver/build.xml" />
 
     <property environment="env" />
-    <property name="app.dir" value="${env.APP_ROOT}" />
+    <property name="app.dir" value="/var/www/orocrm" />
     <property name="app.user" value="www-data" />
+    <property name="app.group" value="www-data" />
     <property name="app.installed" value="true" override="true" />
+    <property name="symfony.env" value="prod" />
+    <property name="app.sample_data" value="no" />
 
     <taskdef name="composermapenvparams" classname="Widgento\Phing\Yaml\MapEnvParamsTask" />
     <taskdef name="composermapenvparam" classname="Widgento\Phing\Yaml\MapEnvParams\Param" />
@@ -31,7 +35,7 @@
             ${app.sample_data}
             --timeout 3600
             --drop-database
-            --env=${env.SYMFONY_ENV}
+            --env=${symfony.env}
             --user-name=admin
             --user-firstname=John
             --user-lastname=Doe
@@ -64,32 +68,34 @@
     </target>
 
     <target name="init-webserver">
-        <phingcall target="map-dev-user" />
-        <exec command="chown ${app.user}:${app.user} ." dir="${app.dir}" passthru="true" checkreturn="true" />
+        <if>
+            <equals arg1="${symfony.env}" arg2="dev" />
+            <then>
+                <phingcall target="map-dev-user" >
+                    <property name="debug" value="yes" />
+                    <property name="app.user" value="${app.user}" />
+                    <property name="app.group" value="${app.group}" />
+                </phingcall>
+                <phingcall target="xdebug-configure" >
+                    <property name="debug" value="yes" />
+                </phingcall>
+            </then>
+            <else>
+                <phingcall target="xdebug-configure" >
+                    <property name="debug" value="no" />
+                </phingcall>
+            </else>
+        </if>
+        <exec command="chown ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
         <copy file="/etc/nginx/conf.d/orocrm.conf.dist" tofile="/etc/nginx/conf.d/orocrm.conf">
             <filterchain>
                 <replacetokens begintoken="${" endtoken="}">
-                    <token key="PHP_VERSION" value="${env.PHP_VERSION}" />
+                    <token key="PHP_VERSION" value="${php.version}" />
                     <token key="APP_ROOT" value="${env.APP_ROOT}" />
-                    <token key="SYMFONY_ENV" value="${env.SYMFONY_ENV}" />
+                    <token key="SYMFONY_ENV" value="${symfony.env}" />
                     <token key="SYMFONY_INDEX_FILE" value="${env.SYMFONY_INDEX_FILE}" />
                 </replacetokens>
             </filterchain>
         </copy>
-    </target>
-
-    <target name="map-dev-user">
-        <if>
-            <equals arg1="${env.SYMFONY_ENV}" arg2="dev"></equals>
-            <then>
-                <exec command="id -u ${app.user}" outputProperty="app.user.old_user_id" />
-                <exec command="id -g ${app.user}" outputProperty="app.user.old_group_id" />
-                <exec command="usermod -u ${env.DEV_USER_ID} ${app.user}" passthru="true" checkreturn="true" />
-                <exec command="groupmod -g ${env.DEV_GROUP_ID} ${app.user}" passthru="true" checkreturn="true" />
-                <exec command="find / -user ${app.user.old_user_id} -exec chown -h ${env.DEV_USER_ID} {} \;" passthru="true" checkreturn="false" />
-                <exec command="find / -group ${app.user.old_group_id} -exec chgrp -h ${env.DEV_GROUP_ID} {} \;" passthru="true" checkreturn="false" />
-                <exec command="usermod -g ${env.DEV_GROUP_ID} ${app.user}" passthru="true" checkreturn="true" />
-            </then>
-        </if>
     </target>
 </project>
