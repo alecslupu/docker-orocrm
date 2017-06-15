@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-/opt/phing/vendor/bin/phing/orocrm init-webserver \
+/opt/phing/orocrm/vendor/bin/phing init-webserver \
     -f /opt/phing/orocrm/build.xml \
     -Dsymfony.env=${SYMFONY_ENV} \
     -Dapp.dir=${APP_ROOT} \
