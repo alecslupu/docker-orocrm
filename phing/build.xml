@@ -98,6 +98,7 @@
                     <token key="APP_ROOT" value="${env.APP_ROOT}" />
                     <token key="SYMFONY_ENV" value="${symfony.env}" />
                     <token key="SYMFONY_INDEX_FILE" value="${env.SYMFONY_INDEX_FILE}" />
+                    <token key="SERVER_NAME" value="${env.VIRTUAL_HOST}" />
                 </replacetokens>
             </filterchain>
         </copy>
