@@ -10,9 +10,9 @@
     }
   ],
   "repositories": {
-    "phing-webserver": {
-      "type": "path",
-      "url": "/opt/phing/webserver"
+    "phing-webserver-debug": {
+      "type": "vcs",
+      "url": "https://github.com/hellosworldos/phing-webserver-debug"
     }
   },
   "require-dev": {

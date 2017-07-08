@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="hellosworldos_orocrm" default="install-app">
     <autoloader autoloaderpath="vendor/autoload.php" />
-    <import file="vendor/hellosworldos/phing-webserver/build.xml" />
+    <import file="vendor/hellosworldos/phing-webserver-debug/build.xml" />
 
     <property environment="env" />
     <property name="app.dir" value="/var/www/orocrm" />
@@ -9,7 +9,7 @@
     <property name="app.group" value="www-data" />
     <property name="app.installed" value="true" override="true" />
     <property name="symfony.env" value="prod" />
-    <property name="app.sample_data" value="no" />
+    <property name="app.sample_data" value="" />
 
     <taskdef name="composermapenvparams" classname="Widgento\Phing\Yaml\MapEnvParamsTask" />
     <taskdef name="composermapenvparam" classname="Widgento\Phing\Yaml\MapEnvParams\Param" />
@@ -21,16 +21,26 @@
         <exec command="git checkout -f ${env.GIT_REF}" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="git submodule update --init" dir="${app.dir}" passthru="true" checkreturn="true" />
         <replaceregexp file="${app.dir}/app/OroRequirements.php" pattern="return \$fileLength == 255;" replace="return \$fileLength >= 242;" />
+        <exec command="composer global require fxp/composer-asset-plugin" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader" dir="${app.dir}" passthru="true" checkreturn="true" />
         <phingcall target="update-symfony-parameters" >
             <property name="app.installed" value="false" />
         </phingcall>
         <if>
-            <equals arg1="${env.APP_SAMPLE_DATA}" arg2="yes"/>
+            <equals arg1="${env.APP_SAMPLE_DATA}" arg2="1"/>
             <then>
                 <property name="app.sample_data" value="--sample-data=SAMPLE_DATA"/>
             </then>
         </if>
+        <phingcall target="configure-app">
+            <property name="app.sample_data" value="${app.sample_data}" />
+            <property name="symfony.env" value="${symfony.env}" />
+            <property name="app.admin_email" value="${env.OROCRM_ADMIN_EMAIL}" />
+            <property name="app.url" value="${env.BASE_URL}" />
+        </phingcall>
+    </target>
+
+    <target name="configure-app">
         <exec command='php app/console oro:install -n
             ${app.sample_data}
             --timeout 3600
@@ -40,9 +50,9 @@
             --user-firstname=John
             --user-lastname=Doe
             --user-password="admin1111"
-            --user-email="${env.OROCRM_ADMIN_EMAIL}"
+            --user-email="${app.admin_email}"
             --organization-name="Acme"
-            --application-url="${env.BASE_URL}"' dir="${app.dir}" passthru="true" checkreturn="true" />
+            --application-url="${app.url}"' dir="${app.dir}" passthru="true" checkreturn="true" />
     </target>
 
     <target name="update-symfony-parameters">
@@ -95,12 +105,26 @@
             <filterchain>
                 <replacetokens begintoken="${" endtoken="}">
                     <token key="PHP_VERSION" value="${php.version}" />
-                    <token key="APP_ROOT" value="${env.APP_ROOT}" />
+                    <token key="OROCRM_ROOT_DIR" value="${env.OROCRM_ROOT_DIR}" />
                     <token key="SYMFONY_ENV" value="${symfony.env}" />
                     <token key="SYMFONY_INDEX_FILE" value="${env.SYMFONY_INDEX_FILE}" />
                     <token key="SERVER_NAME" value="${env.VIRTUAL_HOST}" />
                 </replacetokens>
             </filterchain>
         </copy>
+    </target>
+
+    <target name="orocrm-mount-module">
+        <property name="bundle.dir" value="/opt/orocrm/bundle" override="true" />
+        <property name="bundle.name" value="vendor/bundle-name" override="true" />
+        <exec command="composer config repositories.local_bundle path ${bundle.dir}" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <available file="${bundle.dir}/composer.json" type="file" property="bundle.composer_exists" value="1" />
+        <if>
+            <equals arg1="bundle.composer_exists" arg2="1" />
+            <else>
+
+            </else>
+        </if>
+        <exec command="composer require '${bundle.name}:*'" dir="${app.dir}" passthru="true" checkreturn="true" />
     </target>
 </project>

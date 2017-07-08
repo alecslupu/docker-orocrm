@@ -3,6 +3,7 @@
 /var/
 .env
 /orocrm/
+/orocrm_bundle/
 /phing/bin/
 /phing/vendor/
 /phing/composer.lock

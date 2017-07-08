@@ -20,12 +20,12 @@ services:
       - "MYSQL_DATABASE=${MYSQL_DATABASE}"
       - "MYSQL_USER=${MYSQL_USER}"
       - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
-#    volumes_from:
-#      - data
+    volumes:
+      - "orocrm_mysql_dir:/var/lib/mysql"
 
   mail:
     image: catatnight/postfix
-    container_name: dev_mail
+    container_name: orocrm_mail
     expose:
       - "25"
     environment:
@@ -48,7 +48,14 @@ services:
 #    ports:
 #      - "${APP_WEBSOCKET_FRONTEND_PORT}:8080"
     volumes:
-      - "${HOST_APP_ROOT}:${APP_ROOT}"
+      - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
+      - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
+      - "orocrm_cache_dir:${OROCRM_CACHE_DIR}"
+      - "orocrm_uploads_dir:${OROCRM_UPLOADS_DIR}"
+      - "orocrm_media_dir:${OROCRM_MEDIA_DIR}"
+      - "orocrm_attachment_dir:${OROCRM_ATTACHMENT_DIR}"
+      - "orocrm_import_export_dir:${OROCRM_IMPORT_EXPORT_DIR}"
+      - "orocrm_xdebug_log:${XDEBUG_LOG}"
 #      - "./phing:/opt/phing/orocrm"
       - "~/.ssh/id_rsa:/home/www-data/.ssh/id_rsa:ro"
       - "~/.ssh/id_rsa.pub:/home/www-data/.ssh/id_rsa.pub:ro"
@@ -68,7 +75,7 @@ services:
       - VIRTUAL_HOST
       - SYMFONY_ENV
       - SYMFONY_INDEX_FILE
-      - APP_ROOT
+      - OROCRM_ROOT_DIR
       - GIT_URI
       - GIT_REF
       - DEV_USER_ID
@@ -79,47 +86,41 @@ services:
       - MYSQL_PASSWORD
       - BASE_URL
       - APP_SAMPLE_DATA
+      - OROCRM_BUNDLE_DIR
 
-#volumes:
-#  dev_orocrm_cache_dir:
-#      driver_opts:
-#        type: none
-#        device: "${OROCRM_CACHE_DIR}"
-#        o: bind
-#  dev_orocrm_uploads_dir:
-#      driver_opts:
-#        type: none
-#        device: "${OROCRM_UPLOADS_DIR}"
-#        o: bind
-#  dev_orocrm_media_dir:
-#      driver_opts:
-#        type: none
-#        device: "${OROCRM_MEDIA_DIR}"
-#        o: bind
-#  dev_orocrm_attachment_dir:
-#      driver_opts:
-#        type: none
-#        device: "${OROCRM_ATTACHMENT_DIR}"
-#        o: bind
-#  dev_mysql_dir:
-#      driver_opts:
-#        type: none
-#        device: "${MYSQL_DIR}"
-#        o: bind
-#  dev_postgresql_dir:
-#      driver_opts:
-#        type: none
-#        device: "${POSTGRESQL_DIR}"
-#        o: bind
-#  dev_orocrm_import_export_dir:
-#      driver_opts:
-#        type: none
-#        device: "${OROCRM_IMPORT_EXPORT_DIR}"
-#        o: bind
-#  dev_orocrm_root_dir:
-#      driver_opts:
-#        type: none
-#        device: "${OROCRM_ROOT_DIR}"
-#        o: bind
-#  dev_orocrm_bundle_dir:
-#      external: true
+volumes:
+  orocrm_app_dir:
+      driver_opts:
+        type: none
+        device: "${HOST_OROCRM_ROOT_DIR}"
+        o: bind
+
+  orocrm_bundle_dir:
+      driver_opts:
+        type: none
+        device: "${HOST_OROCRM_BUNDLE_DIR}"
+        o: bind
+
+  orocrm_mysql_dir:
+      driver: local
+
+  orocrm_cache_dir:
+      driver: local
+
+  orocrm_uploads_dir:
+      driver: local
+
+  orocrm_media_dir:
+      driver: local
+
+  orocrm_attachment_dir:
+      driver: local
+
+  orocrm_import_export_dir:
+      driver: local
+
+  orocrm_postgresql_dir:
+      driver: local
+
+  orocrm_xdebug_log_dir:
+      driver: local
