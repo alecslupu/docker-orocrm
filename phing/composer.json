@@ -9,12 +9,6 @@
       "email": "yury@spadar.com"
     }
   ],
-  "repositories": {
-    "phing-webserver-debug": {
-      "type": "vcs",
-      "url": "https://github.com/hellosworldos/phing-webserver-debug"
-    }
-  },
   "require-dev": {
     "phing/phing": "2.*",
     "hellosworldos/phing-webserver-debug": "dev-master",

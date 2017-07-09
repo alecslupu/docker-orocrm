@@ -2,8 +2,7 @@ FROM hellosworldos/webserver:xenial
 MAINTAINER Yury Ksenevich <yury@spadar.com>
 
 # Add init scripts
-ADD bin/orocrm-webserver-run.sh /usr/local/bin/orocrm-webserver-run.sh
-ADD bin/orocrm-install-app.sh /usr/local/bin/orocrm-install-app.sh
+ADD bin/orocrm-*.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/orocrm-*.sh
 

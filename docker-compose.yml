@@ -55,10 +55,11 @@ services:
       - "orocrm_media_dir:${OROCRM_MEDIA_DIR}"
       - "orocrm_attachment_dir:${OROCRM_ATTACHMENT_DIR}"
       - "orocrm_import_export_dir:${OROCRM_IMPORT_EXPORT_DIR}"
-      - "orocrm_xdebug_log:${XDEBUG_LOG}"
-#      - "./phing:/opt/phing/orocrm"
-      - "~/.ssh/id_rsa:/home/www-data/.ssh/id_rsa:ro"
-      - "~/.ssh/id_rsa.pub:/home/www-data/.ssh/id_rsa.pub:ro"
+      - "orocrm_xdebug_log_dir:${XDEBUG_LOG_DIR}"
+      - "orocrm_composer_cache_dir:${COMPOSER_CACHE_DIR}"
+      - "./phing:/opt/phing/orocrm"
+      - "~/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro"
+      - "~/.ssh/id_rsa.pub:/var/www/.ssh/id_rsa.pub:ro"
     environment:
       - APP_DB_DRIVER
       - APP_DB_HOST
@@ -87,6 +88,8 @@ services:
       - BASE_URL
       - APP_SAMPLE_DATA
       - OROCRM_BUNDLE_DIR
+      - XDEBUG_LOG_DIR
+      - GITHUB_OAUTH_TOKEN
 
 volumes:
   orocrm_app_dir:
@@ -123,4 +126,7 @@ volumes:
       driver: local
 
   orocrm_xdebug_log_dir:
+      driver: local
+
+  orocrm_composer_cache_dir:
       driver: local

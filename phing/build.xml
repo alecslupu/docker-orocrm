@@ -4,12 +4,13 @@
     <import file="vendor/hellosworldos/phing-webserver-debug/build.xml" />
 
     <property environment="env" />
-    <property name="app.dir" value="/var/www/orocrm" />
-    <property name="app.user" value="www-data" />
-    <property name="app.group" value="www-data" />
+    <property name="app.dir" value="/var/www/orocrm" override="true" />
+    <property name="app.user" value="www-data" override="true" />
+    <property name="app.group" value="www-data" override="true" />
     <property name="app.installed" value="true" override="true" />
-    <property name="symfony.env" value="prod" />
-    <property name="app.sample_data" value="" />
+    <property name="symfony.env" value="prod" override="true" />
+    <property name="app.sample_data" value="" override="true" />
+    <property name="github.oauth_token" value="${env.GITHUB_OAUTH_TOKEN}" override="true" />
 
     <taskdef name="composermapenvparams" classname="Widgento\Phing\Yaml\MapEnvParamsTask" />
     <taskdef name="composermapenvparam" classname="Widgento\Phing\Yaml\MapEnvParams\Param" />
@@ -21,21 +22,23 @@
         <exec command="git checkout -f ${env.GIT_REF}" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="git submodule update --init" dir="${app.dir}" passthru="true" checkreturn="true" />
         <replaceregexp file="${app.dir}/app/OroRequirements.php" pattern="return \$fileLength == 255;" replace="return \$fileLength >= 242;" />
+        <phingcall target="init-github-auth" />
         <exec command="composer global require fxp/composer-asset-plugin" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader" dir="${app.dir}" passthru="true" checkreturn="true" />
         <phingcall target="update-symfony-parameters" >
             <property name="app.installed" value="false" />
         </phingcall>
         <if>
-            <equals arg1="${env.APP_SAMPLE_DATA}" arg2="1"/>
+            <equals arg1="${env.APP_SAMPLE_DATA}" arg2="yes"/>
             <then>
-                <property name="app.sample_data" value="--sample-data=SAMPLE_DATA"/>
+                <property name="app.sample_data" value="--sample-data=SAMPLE_DATA" override="true" />
             </then>
         </if>
         <phingcall target="configure-app">
             <property name="app.sample_data" value="${app.sample_data}" />
             <property name="symfony.env" value="${symfony.env}" />
             <property name="app.admin_email" value="${env.OROCRM_ADMIN_EMAIL}" />
+            <property name="app.admin_password" value="${env.OROCRM_ADMIN_PASSWORD}" />
             <property name="app.url" value="${env.BASE_URL}" />
         </phingcall>
     </target>
@@ -49,7 +52,7 @@
             --user-name=admin
             --user-firstname=John
             --user-lastname=Doe
-            --user-password="admin1111"
+            --user-password="${app.admin_password}"
             --user-email="${app.admin_email}"
             --organization-name="Acme"
             --application-url="${app.url}"' dir="${app.dir}" passthru="true" checkreturn="true" />
@@ -100,7 +103,10 @@
                 </phingcall>
             </else>
         </if>
-        <exec command="chown ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown -R ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown ${app.user}:${app.group} /var/www/.ssh" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
         <copy file="/etc/nginx/conf.d/orocrm.conf.dist" tofile="/etc/nginx/conf.d/orocrm.conf">
             <filterchain>
                 <replacetokens begintoken="${" endtoken="}">
@@ -114,17 +120,28 @@
         </copy>
     </target>
 
-    <target name="orocrm-mount-module">
+    <target name="init-github-auth">
+        <exec command="composer config -n -g github-oauth.github.com ${github.oauth_token}" dir="${app.dir}" passthru="true" checkreturn="true" />
+    </target>
+
+    <target name="orocrm-mount-bundle">
         <property name="bundle.dir" value="/opt/orocrm/bundle" override="true" />
         <property name="bundle.name" value="vendor/bundle-name" override="true" />
-        <exec command="composer config repositories.local_bundle path ${bundle.dir}" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <phingcall target="init-github-auth" />
+        <exec command="composer config -n repositories.local_bundle path ${bundle.dir}" dir="${app.dir}" passthru="true" checkreturn="true" />
         <available file="${bundle.dir}/composer.json" type="file" property="bundle.composer_exists" value="1" />
         <if>
             <equals arg1="bundle.composer_exists" arg2="1" />
             <else>
-
+                <!-- Bootstrap empty bundle for OroCRM -->
+                <exec command="composer init -n
+                --name='${bundle.name}'
+                --description='${bundle.name}'
+                --type=symfony-bundle
+                --license=proprietary"
+                      dir="${bundle.dir}" passthru="true" checkreturn="true" />
             </else>
         </if>
-        <exec command="composer require '${bundle.name}:*'" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="composer require -n '${bundle.name}:*'" dir="${app.dir}" passthru="true" checkreturn="true" />
     </target>
 </project>

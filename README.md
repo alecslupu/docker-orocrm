@@ -8,5 +8,5 @@ Containers for OroCRM bundle development
 * Pull the repository
 * Copy `.env.dev` to `.env` and adjust your project specific params
 * Run containers `docker-compose up -d`
-* Install Orocrm in your directory if not installed with commamd: `docker-compose exec orocrm orocrm-install-app.sh`
-
+* Install Orocrm in your directory if not installed with commamd: `docker-compose exec orocrm orocrm-install-app.sh` (This will clean up previous OroCRM installation if exists)
+* Mount your new module with command: `docker-compose exec orocrm orocrm-mount-bundle.sh`

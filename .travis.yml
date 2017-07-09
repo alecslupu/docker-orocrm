@@ -6,7 +6,6 @@ php:
   - "7.1"
 
 before_script:
-  - mkdir -p ./phing/vendor/hellosworldos/phing-webserver
   - travis_retry composer install -d ./phing/ --no-interaction
 
 script:
