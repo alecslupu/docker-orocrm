@@ -57,6 +57,9 @@ services:
       - "orocrm_import_export_dir:${OROCRM_IMPORT_EXPORT_DIR}"
       - "orocrm_xdebug_log_dir:${XDEBUG_LOG_DIR}"
       - "orocrm_composer_cache_dir:${COMPOSER_CACHE_DIR}"
+      - "./phing:/opt/phing/orocrm"
+      - "./bin/orocrm-install-app.sh:/usr/local/bin/orocrm-install-app.sh"
+      - "./bin/orocrm-mount-bundle.sh:/usr/local/bin/orocrm-mount-bundle.sh"
       - "~/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro"
       - "~/.ssh/id_rsa.pub:/var/www/.ssh/id_rsa.pub:ro"
     environment:
