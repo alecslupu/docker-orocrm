@@ -11,6 +11,7 @@
     <property name="symfony.env" value="prod" override="true" />
     <property name="app.sample_data" value="" override="true" />
     <property name="github.oauth_token" value="${env.GITHUB_OAUTH_TOKEN}" override="true" />
+    <property name="supervisor.daemon" value="websocket" override="true" />
 
     <taskdef name="composermapenvparams" classname="Widgento\Phing\Yaml\MapEnvParamsTask" />
     <taskdef name="composermapenvparam" classname="Widgento\Phing\Yaml\MapEnvParams\Param" />
@@ -115,6 +116,60 @@
                     <token key="SYMFONY_ENV" value="${symfony.env}" />
                     <token key="SYMFONY_INDEX_FILE" value="${env.SYMFONY_INDEX_FILE}" />
                     <token key="SERVER_NAME" value="${env.VIRTUAL_HOST}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+    </target>
+
+    <target name="init-daemon">
+        <if>
+            <equals arg1="${symfony.env}" arg2="dev" />
+            <then>
+                <phingcall target="map-dev-user" >
+                    <property name="app.debug" value="yes" />
+                    <property name="app.user" value="${app.user}" />
+                    <property name="app.group" value="${app.group}" />
+                    <property name="dev.user_id" value="${env.DEV_USER_ID}" />
+                    <property name="dev.group_id" value="${env.DEV_GROUP_ID}" />
+                </phingcall>
+                <phingcall target="xdebug-configure" >
+                    <property name="app.debug" value="yes" />
+                    <property name="php.version" value="${env.PHP_VERSION}" />
+                </phingcall>
+            </then>
+            <else>
+                <phingcall target="xdebug-configure" >
+                    <property name="app.debug" value="no" />
+                    <property name="php.version" value="${env.PHP_VERSION}" />
+                </phingcall>
+            </else>
+        </if>
+        <exec command="chown -R ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown ${app.user}:${app.group} /var/www/.ssh" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
+        <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
+
+        <!-- dont' run nginx for deamon -->
+        <delete file="/etc/supervisor/conf.d/nginx.conf" />
+
+        <copy file="/etc/supervisor/conf.d/orocrm-${supervisor.daemon}.conf.dist" tofile="/etc/supervisor/conf.d/orocrm-${supervisor.daemon}.conf">
+            <filterchain>
+                <replacetokens begintoken="${" endtoken="}">
+                    <token key="OROCRM_ROOT_DIR" value="${env.OROCRM_ROOT_DIR}" />
+                    <token key="SYMFONY_ENV" value="${symfony.env}" />
+                    <token key="APP_USER" value="${app.user}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+    </target>
+
+    <target name="init-cron">
+        <copy file="/etc/cron.d/orocrm.crontab.dist" tofile="/etc/cron.d/orocrm.crontab">
+            <filterchain>
+                <replacetokens begintoken="${" endtoken="}">
+                    <token key="OROCRM_ROOT_DIR" value="${env.OROCRM_ROOT_DIR}" />
+                    <token key="SYMFONY_ENV" value="${symfony.env}" />
+                    <token key="APP_USER" value="${app.user}" />
                 </replacetokens>
             </filterchain>
         </copy>

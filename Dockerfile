@@ -19,6 +19,10 @@ RUN curl -sL https://deb.nodesource.com/setup_${NODEJS_VERSION} | bash - \
     && apt-get install -y nodejs
 
 ADD etc/nginx/conf.d/orocrm.conf /etc/nginx/conf.d/orocrm.conf.dist
+ADD etc/supervisor/conf.d/orocrm-websocket.conf /etc/supervisor/conf.d/orocrm-websocket.conf.dist
+ADD etc/supervisor/conf.d/orocrm-message-consumer.conf /etc/supervisor/conf.d/orocrm-message-consumer.conf.dist
+ADD etc/supervisor/conf.d/orocrm-cron.conf /etc/supervisor/conf.d/orocrm-cron.conf.dist
+ADD etc/cron.d/orocrm.crontab /etc/cron.d/orocrm.crontab.dist
 
 WORKDIR /var/www/orocrm
 

@@ -45,8 +45,7 @@ services:
     expose:
       - 80
       - 443
-#    ports:
-#      - "${APP_WEBSOCKET_FRONTEND_PORT}:8080"
+#      - "${APP_WEBSOCKET_FRONTEND_PORT}"
     volumes:
       - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
       - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
@@ -60,6 +59,7 @@ services:
       - "./phing:/opt/phing/orocrm"
       - "./bin/orocrm-install-app.sh:/usr/local/bin/orocrm-install-app.sh"
       - "./bin/orocrm-mount-bundle.sh:/usr/local/bin/orocrm-mount-bundle.sh"
+      - "./bin/orocrm-webserver-run.sh:/usr/local/bin/orocrm-webserver-run.sh"
       - "~/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro"
       - "~/.ssh/id_rsa.pub:/var/www/.ssh/id_rsa.pub:ro"
     environment:
@@ -92,6 +92,35 @@ services:
       - OROCRM_BUNDLE_DIR
       - XDEBUG_LOG_DIR
       - GITHUB_OAUTH_TOKEN
+
+  cron:
+    image: widgento/orocrm
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: orocrm-cron-run.sh
+    container_name: ${PROJECT_PREFIX}cron
+    links:
+      - "db"
+      - "mail"
+    volumes:
+      - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
+      - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
+      - "orocrm_cache_dir:${OROCRM_CACHE_DIR}"
+      - "orocrm_uploads_dir:${OROCRM_UPLOADS_DIR}"
+      - "orocrm_media_dir:${OROCRM_MEDIA_DIR}"
+      - "orocrm_attachment_dir:${OROCRM_ATTACHMENT_DIR}"
+      - "orocrm_import_export_dir:${OROCRM_IMPORT_EXPORT_DIR}"
+      - "orocrm_xdebug_log_dir:${XDEBUG_LOG_DIR}"
+      - "orocrm_composer_cache_dir:${COMPOSER_CACHE_DIR}"
+      - "./phing:/opt/phing/orocrm"
+      - "./bin/orocrm-cron-run.sh:/usr/local/bin/orocrm-cron-run.sh"
+    environment:
+      - SYMFONY_ENV
+      - OROCRM_ROOT_DIR
+      - DEV_USER_ID
+      - DEV_GROUP_ID
+      - XDEBUG_LOG_DIR
 
 volumes:
   orocrm_app_dir:

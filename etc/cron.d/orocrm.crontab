@@ -1,0 +1,1 @@
+*/1 * * * * ${APP_USER} ${OROCRM_ROOT_DIR}/app/console oro:cron --env=${SYMFONY_ENV}
