@@ -73,7 +73,7 @@
             <composermapenvparam name="mailer_encryption" value="${env.APP_MAILER_ENCRYPTION}" />
             <composermapenvparam name="mailer_user" value="${env.APP_MAILER_USER}" />
             <composermapenvparam name="mailer_password" value="${env.APP_MAILER_PASSWORD}" />
-            <composermapenvparam name="websocket_bind_port" value="${env.APP_WEBSOCKET_BACKEND_PORT}" />
+            <composermapenvparam name="websocket_bind_port" value="${env.APP_WEBSOCKET_BIND_PORT}" />
             <composermapenvparam name="websocket_backend_port" value="${env.APP_WEBSOCKET_BACKEND_PORT}" />
             <composermapenvparam name="websocket_frontend_port" value="${env.APP_WEBSOCKET_FRONTEND_PORT}" />
             <composermapenvparam name="installed" value="${app.installed}" />
@@ -145,7 +145,6 @@
             </else>
         </if>
         <exec command="chown -R ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
-        <exec command="chown ${app.user}:${app.group} /var/www/.ssh" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
 

@@ -7,6 +7,7 @@ services:
     ports:
       - 80:80
       - 443:443
+      - "${APP_WEBSOCKET_FRONTEND_PORT}:${APP_WEBSOCKET_FRONTEND_PORT}"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
@@ -45,7 +46,6 @@ services:
     expose:
       - 80
       - 443
-#      - "${APP_WEBSOCKET_FRONTEND_PORT}"
     volumes:
       - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
       - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
@@ -72,7 +72,8 @@ services:
       - APP_MAILER_ENCRYPTION
       - APP_MAILER_USER
       - APP_MAILER_PASSWORD
-      - APP_WEBSOCKET_BACKEND_PORT=80
+      - APP_WEBSOCKET_BIND_PORT
+      - APP_WEBSOCKET_BACKEND_PORT
       - APP_WEBSOCKET_FRONTEND_PORT
       - APP_SECRET
       - VIRTUAL_HOST
@@ -121,6 +122,39 @@ services:
       - DEV_USER_ID
       - DEV_GROUP_ID
       - XDEBUG_LOG_DIR
+
+  websocket:
+    image: widgento/orocrm
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: orocrm-websocket-run.sh
+    container_name: ${PROJECT_PREFIX}websocket
+    links:
+      - "db"
+      - "mail"
+      - "nginx-proxy"
+    expose:
+      - "${APP_WEBSOCKET_FRONTEND_PORT}"
+    volumes:
+      - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
+      - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
+      - "orocrm_cache_dir:${OROCRM_CACHE_DIR}"
+      - "orocrm_uploads_dir:${OROCRM_UPLOADS_DIR}"
+      - "orocrm_media_dir:${OROCRM_MEDIA_DIR}"
+      - "orocrm_attachment_dir:${OROCRM_ATTACHMENT_DIR}"
+      - "orocrm_import_export_dir:${OROCRM_IMPORT_EXPORT_DIR}"
+      - "orocrm_xdebug_log_dir:${XDEBUG_LOG_DIR}"
+      - "orocrm_composer_cache_dir:${COMPOSER_CACHE_DIR}"
+      - "./phing:/opt/phing/orocrm"
+      - "./bin/orocrm-webserver-run.sh:/usr/local/bin/orocrm-websocket-run.sh"
+    environment:
+      - SYMFONY_ENV
+      - OROCRM_ROOT_DIR
+      - DEV_USER_ID
+      - DEV_GROUP_ID
+      - XDEBUG_LOG_DIR
+      - VIRTUAL_HOST
 
 volumes:
   orocrm_app_dir:

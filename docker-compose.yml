@@ -42,7 +42,6 @@ services:
     expose:
       - 80
       - 443
-#      - "${APP_WEBSOCKET_FRONTEND_PORT}"
     volumes:
       - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
       - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
@@ -65,7 +64,8 @@ services:
       - APP_MAILER_ENCRYPTION
       - APP_MAILER_USER
       - APP_MAILER_PASSWORD
-      - APP_WEBSOCKET_BACKEND_PORT=80
+      - APP_WEBSOCKET_BIND_PORT
+      - APP_WEBSOCKET_BACKEND_PORT
       - APP_WEBSOCKET_FRONTEND_PORT
       - APP_SECRET
       - VIRTUAL_HOST
