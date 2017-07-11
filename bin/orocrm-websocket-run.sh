@@ -8,7 +8,7 @@
     -debug || exit
 
 while [ -z "$(grep -P "installed\:\s\'\d{4}\-\d{2}\-\d{2}T\d{2}:\d{2}:\d{2}" ${OROCRM_ROOT_DIR}/app/config/parameters.yml)" ]; do
-    echo "Websocket: waiting for installed"
+    echo "Websocket: waiting for symfony installed"
     sleep 1
 done
 

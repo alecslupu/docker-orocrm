@@ -104,6 +104,7 @@
                 </phingcall>
             </else>
         </if>
+        <echo msg="Change www-data user permissions for webserver filesystem" />
         <exec command="chown -R ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="chown ${app.user}:${app.group} /var/www/.ssh" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
@@ -144,6 +145,7 @@
                 </phingcall>
             </else>
         </if>
+        <echo msg="Change www-data user permissions for daemon filesystem" />
         <exec command="chown -R ${app.user}:${app.group} ." dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />
         <exec command="chown -R ${app.user}:${app.group} ${env.XDEBUG_LOG_DIR}" dir="${app.dir}" passthru="true" checkreturn="true" />

@@ -147,7 +147,7 @@ services:
       - "orocrm_xdebug_log_dir:${XDEBUG_LOG_DIR}"
       - "orocrm_composer_cache_dir:${COMPOSER_CACHE_DIR}"
       - "./phing:/opt/phing/orocrm"
-      - "./bin/orocrm-webserver-run.sh:/usr/local/bin/orocrm-websocket-run.sh"
+      - "./bin/orocrm-websocket-run.sh:/usr/local/bin/orocrm-websocket-run.sh"
     environment:
       - SYMFONY_ENV
       - OROCRM_ROOT_DIR
@@ -155,6 +155,35 @@ services:
       - DEV_GROUP_ID
       - XDEBUG_LOG_DIR
       - VIRTUAL_HOST
+
+  message-consumer:
+    image: widgento/orocrm
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: orocrm-message-consumer-run.sh
+    container_name: ${PROJECT_PREFIX}message-consumer
+    links:
+      - "db"
+      - "mail"
+    volumes:
+      - "orocrm_app_dir:${OROCRM_ROOT_DIR}"
+      - "orocrm_bundle_dir:${OROCRM_BUNDLE_DIR}"
+      - "orocrm_cache_dir:${OROCRM_CACHE_DIR}"
+      - "orocrm_uploads_dir:${OROCRM_UPLOADS_DIR}"
+      - "orocrm_media_dir:${OROCRM_MEDIA_DIR}"
+      - "orocrm_attachment_dir:${OROCRM_ATTACHMENT_DIR}"
+      - "orocrm_import_export_dir:${OROCRM_IMPORT_EXPORT_DIR}"
+      - "orocrm_xdebug_log_dir:${XDEBUG_LOG_DIR}"
+      - "orocrm_composer_cache_dir:${COMPOSER_CACHE_DIR}"
+      - "./phing:/opt/phing/orocrm"
+      - "./bin/orocrm-message-consumer-run.sh:/usr/local/bin/orocrm-message-consumer-run.sh"
+    environment:
+      - SYMFONY_ENV
+      - OROCRM_ROOT_DIR
+      - DEV_USER_ID
+      - DEV_GROUP_ID
+      - XDEBUG_LOG_DIR
 
 volumes:
   orocrm_app_dir:
