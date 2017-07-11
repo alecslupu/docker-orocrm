@@ -7,6 +7,7 @@ services:
     ports:
       - 80:80
       - 443:443
+      - "${APP_WEBSOCKET_FRONTEND_PORT}:${APP_WEBSOCKET_FRONTEND_PORT}"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
