@@ -17,10 +17,10 @@ services:
     expose:
       - 3306
     environment:
-      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
-      - "MYSQL_DATABASE=${MYSQL_DATABASE}"
-      - "MYSQL_USER=${MYSQL_USER}"
-      - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
     volumes:
       - "orocrm_mysql_dir:/var/lib/mysql"
 
@@ -78,6 +78,7 @@ services:
       - DEV_USER_ID
       - DEV_GROUP_ID
       - OROCRM_ADMIN_EMAIL
+      - OROCRM_ADMIN_PASSWORD
       - MYSQL_DATABASE
       - MYSQL_USER
       - MYSQL_PASSWORD
