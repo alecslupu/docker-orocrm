@@ -1,6 +1,8 @@
 FROM hellosworldos/webserver:xenial
 MAINTAINER Yury Ksenevich <yury@spadar.com>
 
+ENV NODEJS_VERSION 6.x
+
 # Add init scripts
 ADD bin/orocrm-*.sh /usr/local/bin/
 
