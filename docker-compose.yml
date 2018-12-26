@@ -34,7 +34,8 @@ services:
       - "smtp_user=${APP_MAILER_USER}@${APP_MAILER_HOST}:${APP_MAILER_PASSWORD}"
 
   orocrm:
-    image: widgento/orocrm
+    build:
+      context: . 
     container_name: ${PROJECT_PREFIX}orocrm
     links:
       - "db"
@@ -89,7 +90,8 @@ services:
       - GITHUB_OAUTH_TOKEN
 
   cron:
-    image: widgento/orocrm
+    build:
+      context: .
     command: orocrm-cron-run.sh
     container_name: ${PROJECT_PREFIX}cron
     links:
@@ -113,7 +115,8 @@ services:
       - XDEBUG_LOG_DIR
 
   websocket:
-    image: widgento/orocrm
+    build:
+      context: .
     command: orocrm-websocket-run.sh
     container_name: ${PROJECT_PREFIX}websocket
     links:
@@ -141,7 +144,8 @@ services:
       - VIRTUAL_HOST
 
   message-consumer:
-    image: widgento/orocrm
+    build:
+      context: .
     command: orocrm-message-consumer-run.sh
     container_name: ${PROJECT_PREFIX}message-consumer
     links:

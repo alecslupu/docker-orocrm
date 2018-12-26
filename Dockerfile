@@ -1,4 +1,4 @@
-FROM hellosworldos/webserver:xenial
+FROM hellosworldos/webserver:xenial-php7.2 
 MAINTAINER Yury Ksenevich <yury@spadar.com>
 
 ENV NODEJS_VERSION 6.x
